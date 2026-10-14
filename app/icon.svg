@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Olavarria 3D</title>
+  <rect width="64" height="64" rx="16" fill="#171a19"/>
+  <path d="M30 14 46 23v18l-16 9-16-9V23z" fill="none" stroke="#c8f264" stroke-width="4"/>
+  <path d="m30 14 16 9-16 9-16-9m16 9v18" fill="none" stroke="#c8f264" stroke-width="3"/>
+  <circle cx="30" cy="14" r="3" fill="#ec6b43"/>
+</svg>
