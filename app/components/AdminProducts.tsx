@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/browser";
 type ProductEditorProps = {
   product: Product | null;
   imageUrl: string | null;
+  categories: string[];
   onClose: () => void;
 };
 
@@ -24,7 +25,7 @@ const IMAGE_TYPES: Record<string, string> = {
   "image/webp": "webp",
 };
 
-function ProductEditor({ product, imageUrl, onClose }: ProductEditorProps) {
+function ProductEditor({ product, imageUrl, categories, onClose }: ProductEditorProps) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
@@ -32,6 +33,15 @@ function ProductEditor({ product, imageUrl, onClose }: ProductEditorProps) {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"error" | "success" | "info">("error");
   const [saving, setSaving] = useState(false);
+  const matchingCategoryIndex = categories.indexOf(product?.category ?? "");
+  const [categoryChoice, setCategoryChoice] = useState(
+    matchingCategoryIndex >= 0
+      ? `existing:${matchingCategoryIndex}`
+      : categories.length > 0 && !product
+        ? ""
+        : "new",
+  );
+  const [newCategory, setNewCategory] = useState(product?.category ?? "");
 
   useEffect(() => {
     if (!preview?.startsWith("blob:")) return;
@@ -158,7 +168,37 @@ function ProductEditor({ product, imageUrl, onClose }: ProductEditorProps) {
           <div className="admin-form-grid">
             <label className="admin-field">
               Categoría *
-              <input defaultValue={product?.category ?? ""} maxLength={60} name="category" placeholder="Ej.: Decoración" required />
+              <select
+                onChange={(event) => setCategoryChoice(event.target.value)}
+                required
+                value={categoryChoice}
+              >
+                <option value="" disabled>Seleccioná una categoría</option>
+                {categories.map((category, index) => (
+                  <option key={category} value={`existing:${index}`}>{category}</option>
+                ))}
+                <option value="new">Crear categoría nueva…</option>
+              </select>
+              {categoryChoice === "new" ? (
+                <input
+                  autoComplete="off"
+                  maxLength={60}
+                  name="category"
+                  onChange={(event) => setNewCategory(event.target.value)}
+                  placeholder="Ej.: Decoración"
+                  required
+                  value={newCategory}
+                />
+              ) : (
+                <input
+                  name="category"
+                  type="hidden"
+                  value={categoryChoice.startsWith("existing:")
+                    ? categories[Number(categoryChoice.slice("existing:".length))] ?? ""
+                    : ""}
+                />
+              )}
+              <small>Elegí una categoría existente o seleccioná “Crear categoría nueva”.</small>
             </label>
             <label className="admin-field">
               Precio (ARS)
@@ -242,6 +282,11 @@ export function AdminProducts({
   const [editing, setEditing] = useState<Product | null | undefined>(undefined);
   const [message, setMessage] = useState("");
   const [busyId, setBusyId] = useState("");
+  const categories = useMemo(
+    () => Array.from(new Set(products.map((product) => product.category.trim()).filter(Boolean)))
+      .sort((first, second) => first.localeCompare(second, "es-AR", { sensitivity: "base" })),
+    [products],
+  );
   const publishedCount = products.filter((product) => product.is_published).length;
   const filteredProducts = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("es-AR");
@@ -352,6 +397,7 @@ export function AdminProducts({
 
       {editing !== undefined && (
         <ProductEditor
+          categories={categories}
           imageUrl={editing ? imageUrls[editing.id] ?? null : null}
           key={editing?.id ?? "new-product"}
           onClose={() => setEditing(undefined)}
