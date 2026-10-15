@@ -73,7 +73,7 @@ La autorización se valida en servidor y se refuerza con RLS en Postgres y polí
 - Carga de imágenes JPG, PNG o WebP de hasta 5 MB.
 - Precio opcional, categoría, orden manual y destacado.
 - Búsqueda rápida por nombre o categoría.
-- Bandeja privada de pedidos con estados, búsqueda y enlaces temporales a sus archivos.
+- Bandeja privada de pedidos con estados, búsqueda, ID visible y descargas temporales y protegidas de cada adjunto.
 
 ### Pedidos a medida
 

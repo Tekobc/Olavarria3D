@@ -276,15 +276,24 @@ h2 { margin-bottom: 0; font-size: clamp(2.5rem, 5.1vw, 4.7rem); line-height: 1; 
 .admin-order-head { display: flex; justify-content: space-between; gap: 20px; }
 .admin-order-head h2 { margin: 10px 0 4px; font-size: 1.2rem; letter-spacing: -.045em; }
 .admin-order-contact { margin: 0; color: #546158; font-size: .78rem; overflow-wrap: anywhere; }
+.admin-order-id { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 8px 0 0; color: #758079; font-size: .65rem; }
+.admin-order-id code { padding: 4px 6px; border: 1px solid #e0e5e1; border-radius: 4px; background: #f7f9f7; color: #3d4c42; font: .63rem var(--mono); user-select: all; }
 .admin-order-controls { display: grid; justify-items: end; gap: 10px; }
 .admin-order-controls time { color: #7b847e; font-size: .68rem; }
 .admin-order-controls .admin-field { min-width: 170px; font-size: .65rem; }
 .admin-order-controls select { width: 100%; }
 .admin-order-details { margin: 17px 0 0; color: #4f5b53; font-size: .82rem; line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; }
 .admin-order-attachments { display: flex; align-items: start; gap: 9px; margin-top: 17px; }
+.admin-order-attachment-wrap { width: 84px; flex: 0 0 auto; }
+.admin-order-attachment-wrap.attachment-large { width: 220px; }
 .admin-order-attachment { position: relative; display: grid; width: 84px; height: 76px; flex: 0 0 auto; place-items: center; overflow: hidden; border-radius: 6px; background: #eef0e9; color: #4b584f; }
 .admin-order-attachment.attachment-large { width: 220px; height: 155px; }
 .admin-order-attachment > img { object-fit: cover; }
+.admin-order-download { display: block; margin-top: 6px; padding: 7px 8px; border: 1px solid #dce4de; border-radius: 5px; background: #f8faf8; color: #315e43; font-size: .66rem; font-weight: 750; text-align: center; }
+.admin-order-download:hover { border-color: #6f9b7c; background: #edf6ef; }
+.admin-order-download-unavailable, .admin-order-no-attachments { color: #77817a; font-size: .68rem; }
+.admin-order-download-unavailable { display: block; margin-top: 6px; text-align: center; }
+.admin-order-no-attachments { margin: 16px 0 0; }
 .admin-order-file-icon { position: relative; z-index: 1; color: var(--orange); font: .73rem var(--mono); font-weight: 700; }
 .admin-order-file-name { position: absolute; inset: auto 0 0; z-index: 2; display: block; overflow: hidden; padding: 17px 6px 5px; background: linear-gradient(transparent, rgba(10,15,12,.78)); color: white; font-size: .57rem; text-overflow: ellipsis; white-space: nowrap; }
 .admin-order-file-name small { display: block; margin-top: 2px; font-size: .52rem; }
@@ -348,6 +357,11 @@ h2 { margin-bottom: 0; font-size: clamp(2.5rem, 5.1vw, 4.7rem); line-height: 1; 
   .order-delivery-options p { color: #c2e3cc; }
   .order-delivery-options small { color: #9bb7a3; }
   .admin-order-controls time { color: #a4b8cc; }
+  .admin-order-id { color: #a4b8cc; }
+  .admin-order-id code { border-color: #3d526b; background: #122033; color: #d4e0ec; }
+  .admin-order-download { border-color: #40566e; background: #20354b; color: #c4e4cf; }
+  .admin-order-download:hover { border-color: #6a9b79; background: #254332; }
+  .admin-order-download-unavailable, .admin-order-no-attachments { color: #a4b0a8; }
   .admin-order-controls select { color: #edf4fb; }
   .status-order-received { background: #49351d; color: #ffd39e; }
   .status-order-reviewing { background: #233750; color: #bed6ff; }
@@ -433,6 +447,8 @@ h2 { margin-bottom: 0; font-size: clamp(2.5rem, 5.1vw, 4.7rem); line-height: 1; 
   .attachment-dropzone .attachment-add { margin-left: 0; }
   .admin-order-attachments { flex-wrap: wrap; }
   .admin-order-attachment.attachment-large { width: 100%; height: auto; aspect-ratio: 1.65 / 1; }
+  .admin-order-attachment-wrap.attachment-large { width: 100%; }
+  .admin-order-attachment-wrap:not(.attachment-large) { width: 74px; }
   .admin-order-attachment:not(.attachment-large) { width: 74px; height: 70px; }
   .order-admin-toolbar { align-items: stretch; }
   .order-filter-label { min-width: 0; }

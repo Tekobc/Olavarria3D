@@ -49,18 +49,37 @@ export default async function AdminOrdersPage() {
   });
   const paths = orders.flatMap((order) => order.attachments.map(({ path }) => path));
   const signedUrlByPath: Record<string, string> = {};
+  const downloadUrlByPath: Record<string, string> = {};
 
   if (paths.length) {
-    const { data: signedUrls, error: signedUrlError } = await supabase
-      .storage
-      .from("order-attachments")
-      .createSignedUrls(paths, 3600);
-    if (signedUrlError) {
-      console.error("No se pudieron generar enlaces seguros para los adjuntos:", signedUrlError.message);
+    const storage = supabase.storage.from("order-attachments");
+    const [
+      { data: signedUrls, error: signedUrlError },
+      { data: downloadUrls, error: downloadUrlError },
+    ] = await Promise.all([
+      storage.createSignedUrls(paths, 300),
+      storage.createSignedUrls(paths, 300, { download: true }),
+    ]);
+
+    const storageError = signedUrlError ?? downloadUrlError;
+    if (storageError) {
+      console.error("No se pudieron generar enlaces seguros para los adjuntos:", storageError.message);
       throw new Error("No se pudieron abrir los archivos de los pedidos. Revisá las políticas de Storage.");
     }
+
     for (const signed of signedUrls ?? []) {
+      if (signed.error) {
+        console.error("No se pudo generar un enlace seguro para un adjunto:", signed.error);
+        throw new Error("No se pudieron abrir los archivos de los pedidos. Revisá las políticas de Storage.");
+      }
       if (signed.path && signed.signedUrl) signedUrlByPath[signed.path] = signed.signedUrl;
+    }
+    for (const signed of downloadUrls ?? []) {
+      if (signed.error) {
+        console.error("No se pudo generar un enlace de descarga para un adjunto:", signed.error);
+        throw new Error("No se pudieron descargar los archivos de los pedidos. Revisá las políticas de Storage.");
+      }
+      if (signed.path && signed.signedUrl) downloadUrlByPath[signed.path] = signed.signedUrl;
     }
   }
 
@@ -87,7 +106,11 @@ export default async function AdminOrdersPage() {
           </div>
           <span className="admin-product-count">{orders.length} {orders.length === 1 ? "pedido" : "pedidos"}</span>
         </div>
-        <AdminOrders orders={orders} signedUrlByPath={signedUrlByPath} />
+        <AdminOrders
+          orders={orders}
+          signedUrlByPath={signedUrlByPath}
+          downloadUrlByPath={downloadUrlByPath}
+        />
       </main>
     </div>
   );

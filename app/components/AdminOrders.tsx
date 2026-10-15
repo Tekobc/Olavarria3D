@@ -33,9 +33,11 @@ function formatBytes(bytes: number) {
 export function AdminOrders({
   orders,
   signedUrlByPath,
+  downloadUrlByPath,
 }: {
   orders: Order[];
   signedUrlByPath: Record<string, string>;
+  downloadUrlByPath: Record<string, string>;
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -96,6 +98,9 @@ export function AdminOrders({
                   <span className={`status-badge status-order-${order.status}`}>{STATUS_LABELS[order.status]}</span>
                   <h2>{order.customer_name}</h2>
                   <p className="admin-order-contact">{order.contact}</p>
+                  <p className="admin-order-id">
+                    ID del pedido <code>{order.id}</code>
+                  </p>
                 </div>
                 <div className="admin-order-controls">
                   <time dateTime={order.created_at}>{formatDate(order.created_at)}</time>
@@ -112,30 +117,46 @@ export function AdminOrders({
                 </div>
               </div>
               <p className="admin-order-details">{order.details}</p>
-              {order.attachments.length > 0 && (
+              {order.attachments.length > 0 ? (
                 <section className="admin-order-attachments" aria-label="Archivos adjuntos">
                   {[...order.attachments.filter((attachment) => attachment.type.startsWith("image/")), ...order.attachments.filter((attachment) => !attachment.type.startsWith("image/"))].map((attachment, index) => {
                     const url = signedUrlByPath[attachment.path];
+                    const downloadUrl = downloadUrlByPath[attachment.path];
                     const isImage = attachment.type.startsWith("image/");
                     return (
-                      <a
-                        className={`admin-order-attachment${index === 0 ? " attachment-large" : ""}`}
-                        href={url}
-                        key={attachment.path}
-                        rel="noreferrer"
-                        target="_blank"
-                        title={`Abrir ${attachment.name}`}
-                      >
-                        {url && isImage ? (
-                          <Image alt={attachment.name} fill sizes={index === 0 ? "240px" : "90px"} src={url} unoptimized />
+                      <div className={`admin-order-attachment-wrap${index === 0 ? " attachment-large" : ""}`} key={attachment.path}>
+                        <a
+                          className={`admin-order-attachment${index === 0 ? " attachment-large" : ""}`}
+                          href={url}
+                          rel="noreferrer"
+                          target="_blank"
+                          title={`Previsualizar ${attachment.name}`}
+                        >
+                          {url && isImage ? (
+                            <Image alt={attachment.name} fill sizes={index === 0 ? "240px" : "90px"} src={url} unoptimized />
+                          ) : (
+                            <span className="admin-order-file-icon">{attachment.type === "application/pdf" ? "PDF" : "3D"}</span>
+                          )}
+                          <span className="admin-order-file-name">{attachment.name}<small>{formatBytes(attachment.size)}</small></span>
+                        </a>
+                        {downloadUrl ? (
+                          <a
+                            className="admin-order-download"
+                            href={downloadUrl}
+                            download={attachment.name}
+                            aria-label={`Descargar ${attachment.name} del pedido ${order.id}`}
+                          >
+                            Descargar
+                          </a>
                         ) : (
-                          <span className="admin-order-file-icon">{attachment.type === "application/pdf" ? "PDF" : "3D"}</span>
+                          <span className="admin-order-download-unavailable">Descarga no disponible</span>
                         )}
-                        <span className="admin-order-file-name">{attachment.name}<small>{formatBytes(attachment.size)}</small></span>
-                      </a>
+                      </div>
                     );
                   })}
                 </section>
+              ) : (
+                <p className="admin-order-no-attachments">Este pedido no tiene archivos adjuntos.</p>
               )}
             </article>
           ))}
