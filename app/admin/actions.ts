@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
+import type { OrderStatus } from "@/lib/types";
 
 const productSchema = z.object({
   id: z.string().uuid().optional().or(z.literal("")),
@@ -104,6 +105,37 @@ export async function deleteProductAction(id: string) {
 
   revalidateCatalog();
   return { ok: true as const, message: "Producto eliminado." };
+}
+
+export async function updateOrderStatusAction(id: string, status: OrderStatus) {
+  const { supabase } = await requireAdmin();
+  const validId = z.string().uuid().safeParse(id);
+  const validStatus = z.enum([
+    "received",
+    "reviewing",
+    "quoted",
+    "in_progress",
+    "completed",
+    "cancelled",
+  ]).safeParse(status);
+  if (!validId.success || !validStatus.success) {
+    return { ok: false as const, message: "El pedido o el estado no son válidos." };
+  }
+
+  const { data, error } = await supabase
+    .from("orders")
+    .update({ status: validStatus.data })
+    .eq("id", validId.data)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    if (error) console.error("No se pudo cambiar el estado del pedido:", error.message);
+    return { ok: false as const, message: "No se pudo actualizar el pedido." };
+  }
+
+  revalidatePath("/admin/pedidos");
+  return { ok: true as const, message: "Estado del pedido actualizado." };
 }
 
 export async function signOutAction() {

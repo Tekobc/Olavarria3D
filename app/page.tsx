@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { BrandMark } from "@/app/components/BrandMark";
 import { Catalog } from "@/app/components/Catalog";
+import { ProductCarousel } from "@/app/components/ProductCarousel";
 import { BUSINESS } from "@/lib/business";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -35,15 +37,14 @@ export default async function HomePage() {
       <header className="site-header">
         <div className="shell nav">
           <Link className="brand" href="/" aria-label="Olavarria 3D, inicio">
-            <span className="brand-symbol" aria-hidden="true">O3</span>
+            <BrandMark className="brand-symbol" />
             <span>OLAVARRIA <b>3D</b></span>
           </Link>
           <nav className="nav-links" aria-label="Navegación">
             <a href="#catalogo">Catálogo</a>
             <a href="#proceso">Cómo funciona</a>
-            <a className="nav-cta" href={BUSINESS.instagramUrl} target="_blank" rel="noreferrer">
-              Hablemos <span aria-hidden="true">↗</span>
-            </a>
+            <Link href="/simulador">Simulador 3D</Link>
+            <Link className="nav-cta" href="/pedidos">Hacer un pedido <span aria-hidden="true">↗</span></Link>
           </nav>
         </div>
       </header>
@@ -60,6 +61,8 @@ export default async function HomePage() {
               <a className="button button-primary" href="#catalogo">
                 Explorá el catálogo <span aria-hidden="true">↓</span>
               </a>
+              <Link className="button button-quiet" href="/simulador">Probá el simulador 3D <span aria-hidden="true">↗</span></Link>
+              <Link className="button button-quiet" href="/pedidos">Contanos tu idea <span aria-hidden="true">↗</span></Link>
               <a className="button button-quiet" href={BUSINESS.instagramUrl} target="_blank" rel="noreferrer">
                 Escribinos por Instagram <span aria-hidden="true">↗</span>
               </a>
@@ -75,12 +78,12 @@ export default async function HomePage() {
             <svg className="hero-object" viewBox="0 0 440 440" role="img" aria-label="Objeto geométrico en impresión 3D">
               <defs>
                 <linearGradient id="objectFront" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#d4f26a" />
-                  <stop offset="1" stopColor="#8fb632" />
+                  <stop offset="0" stopColor="#72c5ff" />
+                  <stop offset="1" stopColor="#1675c9" />
                 </linearGradient>
                 <linearGradient id="objectSide" x1="0" y1="0" x2="0.9" y2="1">
-                  <stop offset="0" stopColor="#a9d84a" />
-                  <stop offset="1" stopColor="#648725" />
+                  <stop offset="0" stopColor="#3299ed" />
+                  <stop offset="1" stopColor="#074c91" />
                 </linearGradient>
               </defs>
               <ellipse cx="222" cy="348" rx="130" ry="25" fill="#0d100f" opacity=".35" />
@@ -88,9 +91,9 @@ export default async function HomePage() {
               <path d="m220 83 117 68v135l-117-69z" fill="url(#objectSide)" />
               <path d="m103 151 117 66 117-66M220 217v138" fill="none" stroke="#eaffb3" strokeOpacity=".72" strokeWidth="3" />
               <path d="m143 175 77 44 78-45m-155 66 77 44 78-45m-155 0 77 44 78-45" fill="none" stroke="#63832a" strokeOpacity=".58" strokeWidth="2" />
-              <path d="M154 134v-38h68m-67 15h85m-85 15h66" fill="none" stroke="#f4f3ed" strokeWidth="5" strokeLinecap="round" opacity=".78" />
-              <circle cx="222" cy="96" r="9" fill="#ed6a42" />
-              <path d="M220 105v29" stroke="#ed6a42" strokeWidth="4" strokeDasharray="3 7" />
+              <path d="M154 134v-38h68m-67 15h85m-85 15h66" fill="none" stroke="#f4f8ff" strokeWidth="5" strokeLinecap="round" opacity=".82" />
+              <circle cx="222" cy="96" r="9" fill="#ffffff" />
+              <path d="M220 105v29" stroke="#ffffff" strokeWidth="4" strokeDasharray="3 7" />
             </svg>
             <div className="visual-label label-bottom"><span>OLAVARRIA</span><b>3D / 01</b></div>
             <span className="visual-cross cross-one" aria-hidden="true">+</span>
@@ -119,7 +122,10 @@ export default async function HomePage() {
               <a href={BUSINESS.instagramUrl} target="_blank" rel="noreferrer">Visitar {BUSINESS.instagramHandle} ↗</a>
             </div>
           ) : (
-            <Catalog products={products} />
+            <>
+              <ProductCarousel products={products} />
+              <Catalog products={products} />
+            </>
           )}
         </section>
 
@@ -148,13 +154,14 @@ export default async function HomePage() {
           <a className="button button-dark" href={BUSINESS.instagramUrl} target="_blank" rel="noreferrer">
             Hablemos por Instagram <span aria-hidden="true">↗</span>
           </a>
+          <Link className="button button-quiet closing-order-link" href="/pedidos">O contanos tu proyecto <span aria-hidden="true">→</span></Link>
         </section>
       </main>
 
       <footer className="site-footer">
         <div className="shell footer-inner">
           <Link className="brand footer-brand" href="/">
-            <span className="brand-symbol" aria-hidden="true">O3</span>
+            <BrandMark className="brand-symbol" />
             <span>OLAVARRIA <b>3D</b></span>
           </Link>
           <span>Diseño y fabricación en impresión 3D</span>

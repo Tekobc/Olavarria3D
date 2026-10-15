@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BrandMark } from "@/app/components/BrandMark";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { loginAction } from "./actions";
@@ -38,7 +39,7 @@ export default async function AdminLoginPage({
     <main className="login-page">
       <section className="login-card" aria-labelledby="login-title">
         <Link className="admin-brand" href="/">
-          <span className="admin-brand-mark" aria-hidden="true">O3</span>
+          <BrandMark className="admin-brand-mark" />
           <span>OLAVARRIA 3D</span>
         </Link>
         <p className="admin-eyebrow">ÁREA PRIVADA</p>

@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BrandMark } from "@/app/components/BrandMark";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { requireAdmin } from "@/lib/admin";
 import { AdminProducts } from "@/app/components/AdminProducts";
@@ -36,11 +38,12 @@ export default async function AdminPage() {
     <div className="admin-shell">
       <header className="admin-topbar">
         <a className="admin-brand" href="/">
-          <span className="admin-brand-mark" aria-hidden="true">O3</span>
+          <BrandMark className="admin-brand-mark" />
           <span>OLAVARRIA 3D <span className="muted">/ ADMIN</span></span>
         </a>
         <div className="admin-top-actions">
           <span>{user.email}</span>
+          <Link className="admin-link" href="/admin/pedidos">Pedidos</Link>
           <a className="admin-link" href="/" target="_blank" rel="noreferrer">Ver tienda ↗</a>
           <form action={signOutAction}><button className="admin-button-secondary" type="submit">Cerrar sesión</button></form>
         </div>

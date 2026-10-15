@@ -1,5 +1,5 @@
 begin;
-select plan(4);
+select plan(10);
 
 insert into public.products (
   id, name, description, category, is_published
@@ -41,6 +41,43 @@ select ok(
 select ok(
   not has_table_privilege('anon', 'public.products', 'DELETE'),
   'La persona visitante no tiene permiso SQL para eliminar productos'
+);
+
+select ok(
+  has_table_privilege('anon', 'public.orders', 'INSERT'),
+  'La persona visitante puede enviar pedidos'
+);
+
+select ok(
+  not has_table_privilege('anon', 'public.orders', 'SELECT'),
+  'La persona visitante no puede leer pedidos recibidos'
+);
+
+select ok(
+  not has_table_privilege('anon', 'public.orders', 'UPDATE'),
+  'La persona visitante no puede modificar pedidos'
+);
+
+select ok(
+  not has_table_privilege('anon', 'public.orders', 'DELETE'),
+  'La persona visitante no puede eliminar pedidos'
+);
+
+select lives_ok(
+  $$
+    insert into public.orders (customer_name, contact, details)
+    values ('Cliente de prueba', 'cliente@example.com', 'Pedido de prueba para revisar RLS.')
+  $$,
+  'La persona visitante puede crear un pedido'
+);
+
+reset role;
+set local role authenticated;
+
+select is(
+  (select count(*) from public.orders),
+  0::bigint,
+  'Una cuenta autenticada que no es administradora no puede leer pedidos'
 );
 
 reset role;

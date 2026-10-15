@@ -16,9 +16,12 @@ Tienda pública y panel privado de catálogo, preparada para Next.js en Vercel y
    npm install
    ```
 
-2. Copiá `.env.example` como `.env.local` y completá la URL del proyecto y su publishable key. Se encuentran en **Supabase → Project Settings → API Keys**. No agregues una secret/service-role key al frontend ni a variables `NEXT_PUBLIC_*`.
+2. Copiá `.env.example` como `.env.local` y completá la URL del proyecto y su publishable key. Se encuentran en **Supabase → Project Settings → API Keys**. La clave `service_role` también se toma de allí y solo se configura del lado servidor; nunca la agregues al frontend ni a variables `NEXT_PUBLIC_*`.
+   Para que el formulario también envíe el correo con adjuntos, configurá en el servidor `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY` y `RESEND_FROM_EMAIL`. La dirección remitente debe pertenecer a un dominio verificado en Resend; estas claves nunca llevan el prefijo `NEXT_PUBLIC_`.
 
-3. Aplicá la migración con Supabase CLI:
+3. Para habilitar el correo automático con adjuntos, creá una cuenta en Resend, verificá un dominio propio y creá una API key. Configurá `RESEND_FROM_EMAIL` con una dirección de ese dominio. La app conserva los adjuntos en el bucket privado de Supabase y usa la clave server-only para leerlos al enviar la notificación.
+
+4. Aplicá la migración con Supabase CLI:
 
    ```bash
    npx supabase login
@@ -26,7 +29,7 @@ Tienda pública y panel privado de catálogo, preparada para Next.js en Vercel y
    npx supabase db push
    ```
 
-4. Iniciá la app:
+5. Iniciá la app:
 
    ```bash
    npm run dev
@@ -56,9 +59,11 @@ La autorización se valida en servidor y se refuerza con RLS en Postgres y polí
 ### Tienda pública
 
 - Catálogo con filtros por categoría.
+- Carrusel infinito de productos publicados con orden aleatorio; incorpora los productos al publicarse desde administración.
 - Productos destacados, descripción, foto y precio opcional.
 - Cuando el precio se deja vacío, la tienda muestra “Consultar precio”.
 - CTA de contacto por el canal confirmado: Instagram `@olavarria3d`.
+- Simulador interactivo en `/simulador`: vista 3D con modelos de muestra, elección de filamento, velocidad, progreso y consola virtual.
 
 ### Administración
 
@@ -68,10 +73,25 @@ La autorización se valida en servidor y se refuerza con RLS en Postgres y polí
 - Carga de imágenes JPG, PNG o WebP de hasta 5 MB.
 - Precio opcional, categoría, orden manual y destacado.
 - Búsqueda rápida por nombre o categoría.
+- Bandeja privada de pedidos con estados, búsqueda y enlaces temporales a sus archivos.
+
+### Pedidos a medida
+
+- Formulario público en `/pedidos`, disponible desde la navegación y el hero.
+- Nombre, un medio de contacto y descripción del proyecto.
+- Hasta 5 adjuntos: JPG, PNG, WebP, PDF y modelos STL, OBJ, 3MF o STEP.
+- Se pueden seleccionar o arrastrar archivos; máximo 10 MB por archivo y 25 MB por envío. La primera foto se muestra grande y los demás archivos como miniaturas.
+- Los adjuntos quedan en un bucket privado. Solo administradores autorizados pueden abrirlos.
+- Al enviar, el pedido se guarda en Supabase y se manda por correo a `gianfranco1010@gmail.com` con los adjuntos. También se ofrece abrir WhatsApp `+54 2284 673989` con los datos preparados para que el cliente confirme el envío. WhatsApp no permite que el sitio envíe el mensaje ni adjunte archivos automáticamente.
+- Los pedidos se gestionan desde `/admin/pedidos`; sus estados son Nuevo, En revisión, Presupuestado, En producción, Entregado y Cancelado.
+
+La identidad visual usa el logo proporcionado y una paleta de azul, blanco y tonos fríos tomada como referencia del flyer. El precio aparece con mayor jerarquía en cada publicación.
 
 ## Datos de producto
 
 La tabla `public.products` mantiene texto, estado de publicación y ruta de imagen. Las fotos se guardan en el bucket `product-images`. El bucket es público solo para mostrar las imágenes ya publicadas; la carga y eliminación de objetos queda restringida a usuarios presentes en `public.admin_users`.
+
+La tabla `public.orders` recibe consultas con RLS: visitantes pueden insertar pedidos, pero no leerlos ni modificarlos. La bandeja y los archivos privados solo están disponibles para usuarios de `public.admin_users`. Se deben aplicar todas las migraciones pendientes para habilitar esta función.
 
 ## Vercel
 
@@ -80,6 +100,9 @@ La tabla `public.products` mantiene texto, estado de publicación y ruta de imag
 3. Agregá estas variables de entorno para Development, Preview y Production:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY` (server-only; necesaria para descargar adjuntos privados y enviarlos por correo)
+   - `RESEND_API_KEY` (server-only)
+   - `RESEND_FROM_EMAIL` (dirección de un dominio verificado en Resend)
 4. En Supabase, agregá el dominio de producción de Vercel a **Authentication → URL Configuration → Redirect URLs**. Para desarrollo agregá también `http://localhost:3000/**`.
 5. Desplegá. Los previews de Vercel pueden usar el mismo proyecto Supabase o uno separado; para producción conviene separar los datos si se van a probar cambios.
 
@@ -94,11 +117,12 @@ npm run build
 npx supabase test db
 ```
 
-La prueba SQL de RLS está en `supabase/tests/catalog_rls.test.sql`. `supabase test db` necesita el stack local de Supabase, habitualmente ejecutado con Docker.
+Las pruebas SQL de RLS están en `supabase/tests/catalog_rls.test.sql`. `supabase test db` necesita el stack local de Supabase, habitualmente ejecutado con Docker.
 
 ## Decisiones de seguridad
 
 - La clave pública/publishable se usa desde cliente; **nunca** exponer `service_role` ni secret keys.
+- `SUPABASE_SERVICE_ROLE_KEY` y `RESEND_API_KEY` son exclusivamente variables de servidor. La clave de Supabase solo se usa para leer temporalmente los adjuntos privados al crear el correo.
 - No hay endpoint ni formulario de registro de administradores.
 - `admin_users` es la lista de autorización administrada desde SQL/Supabase Studio.
 - RLS protege productos y Storage incluso si alguien intenta acceder fuera de la interfaz.
@@ -107,5 +131,5 @@ La prueba SQL de RLS está en `supabase/tests/catalog_rls.test.sql`. `supabase t
 ## Pendiente antes de vender
 
 - Cargar el catálogo real, precios y fotos del emprendimiento.
-- Confirmar si el negocio quiere recibir consultas también por WhatsApp y sumar el número real.
+- Configurar Resend, verificar el dominio remitente y agregar las variables server-only requeridas para activar el email automático.
 - Definir zona de entrega, tiempos, métodos de pago y política de cambios.
